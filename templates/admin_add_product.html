@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Add Product — ZingThings Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Boogaloo&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <style>
+    :root {
+      --bg:#0b0b18;--card:#13132a;--border:rgba(255,255,255,0.07);
+      --text:#e8e8ff;--muted:#666;
+      --grad:linear-gradient(135deg,#FF3CAC,#784BA0,#2B86C5);
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;}
+    .sidebar{width:240px;min-height:100vh;background:var(--card);border-right:1px solid var(--border);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;padding:1.5rem 1rem;flex-shrink:0;}
+    .sb-brand{font-family:'Boogaloo',cursive;font-size:1.7rem;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:2rem;padding:0 0.5rem;}
+    .sb-label{font-size:0.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.12em;padding:0 0.5rem;margin-bottom:0.5rem;margin-top:1rem;}
+    .sb-link{display:flex;align-items:center;gap:0.75rem;padding:0.7rem 0.8rem;border-radius:10px;text-decoration:none;color:#aaa;font-weight:700;font-size:0.9rem;transition:all 0.2s;margin-bottom:0.2rem;}
+    .sb-link:hover{background:rgba(255,255,255,0.06);color:#fff;}
+    .sb-link.active{background:rgba(255,60,172,0.15);color:#ff8cd8;}
+    .sb-link i{width:18px;text-align:center;}
+    .sb-spacer{flex:1;}
+    .sb-user{padding:0.8rem;border-radius:12px;background:rgba(255,255,255,0.04);border:1px solid var(--border);display:flex;align-items:center;gap:0.7rem;}
+    .sb-avatar{width:36px;height:36px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;}
+    .sb-user-name{font-weight:800;font-size:0.88rem;}
+    .sb-user-role{font-size:0.72rem;color:var(--muted);}
+    .main{flex:1;padding:2rem;max-width:700px;}
+    .page-title{font-family:'Boogaloo',cursive;font-size:2.2rem;margin-bottom:2rem;}
+    .form-card{background:var(--card);border:1px solid var(--border);border-radius:22px;padding:2rem;}
+    .form-group{margin-bottom:1.4rem;}
+    .form-group label{display:block;font-weight:700;font-size:0.88rem;color:#aaa;margin-bottom:0.45rem;}
+    .form-group input,.form-group select{width:100%;padding:0.85rem 1rem;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:12px;color:var(--text);font-family:'Nunito',sans-serif;font-size:0.97rem;outline:none;transition:border-color 0.2s,box-shadow 0.2s;}
+    .form-group input:focus,.form-group select:focus{border-color:rgba(255,60,172,0.5);box-shadow:0 0 0 3px rgba(255,60,172,0.1);}
+    .form-group select option{background:#13132a;}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+    .emoji-preview{font-size:3rem;text-align:center;padding:1rem;background:rgba(255,255,255,0.03);border-radius:12px;margin-top:0.5rem;}
+    .btn-submit{width:100%;padding:0.95rem;background:var(--grad);color:#fff;font-family:'Nunito',sans-serif;font-weight:800;font-size:1rem;border:none;border-radius:14px;cursor:pointer;box-shadow:0 6px 25px rgba(255,60,172,0.3);transition:all 0.2s;margin-top:0.5rem;}
+    .btn-submit:hover{opacity:0.9;transform:translateY(-2px);}
+    .btn-back{display:inline-flex;align-items:center;gap:0.4rem;color:#aaa;text-decoration:none;font-weight:700;font-size:0.9rem;margin-bottom:1.5rem;transition:color 0.2s;}
+    .btn-back:hover{color:#fff;}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+    .form-card{animation:fadeUp 0.5s ease;}
+  </style>
+</head>
+<body>
+<aside class="sidebar">
+  <div class="sb-brand">⚡ ZingThings</div>
+  <div class="sb-label">Menu</div>
+  <a href="{{ url_for('admin_dashboard') }}" class="sb-link"><i class="fa fa-gauge"></i> Dashboard</a>
+  <a href="{{ url_for('admin_add_product') }}" class="sb-link active"><i class="fa fa-plus"></i> Add Product</a>
+  <a href="{{ url_for('shop') }}" class="sb-link" target="_blank"><i class="fa fa-store"></i> View Shop</a>
+  <div class="sb-label">Account</div>
+  <a href="{{ url_for('admin_logout') }}" class="sb-link"><i class="fa fa-right-from-bracket"></i> Logout</a>
+  <div class="sb-spacer"></div>
+  <div class="sb-user">
+    <div class="sb-avatar">👑</div>
+    <div>
+      <div class="sb-user-name">{{ session.admin_user }}</div>
+      <div class="sb-user-role">Administrator</div>
+    </div>
+  </div>
+</aside>
+<main class="main">
+  <a href="{{ url_for('admin_dashboard') }}" class="btn-back"><i class="fa fa-arrow-left"></i> Back to Dashboard</a>
+  <h1 class="page-title">➕ Add New Product</h1>
+  <div class="form-card">
+    <form method="POST">
+      <div class="form-group">
+        <label>Product Name</label>
+        <input type="text" name="name" placeholder="e.g. Cosmic Fidget Cube" required/>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Price ($)</label>
+          <input type="number" name="price" step="0.01" min="0" placeholder="9.99" required/>
+        </div>
+        <div class="form-group">
+          <label>Stock Quantity</label>
+          <input type="number" name="stock" min="0" placeholder="50" required/>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Category</label>
+          <select name="category" required>
+            <option value="">Select category…</option>
+            <option>Fidgets</option>
+            <option>Classic</option>
+            <option>Spinners</option>
+            <option>Putty</option>
+            <option>Pop-It</option>
+            <option>Tech</option>
+            <option>Slime</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Emoji Icon</label>
+          <input type="text" name="emoji" id="emoji-input" placeholder="🎁" maxlength="4" value="🎁"/>
+          <div class="emoji-preview" id="emoji-preview">🎁</div>
+        </div>
+      </div>
+      <button type="submit" class="btn-submit"><i class="fa fa-plus"></i> &nbsp;Add Product</button>
+    </form>
+  </div>
+</main>
+<script>
+  document.getElementById('emoji-input').addEventListener('input', function() {
+    document.getElementById('emoji-preview').textContent = this.value || '🎁';
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Login — ZingThings</title>
+  <link href="https://fonts.googleapis.com/css2?family=Boogaloo&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <style>
+    :root {
+      --grad: linear-gradient(135deg, #FF3CAC, #784BA0, #2B86C5);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: #0f0f1a;
+      color: #f0f0ff;
+      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      position: relative; overflow: hidden;
+    }
+
+    /* BG Orbs */
+    .orb {
+      position: fixed; border-radius: 50%;
+      filter: blur(80px); opacity: 0.2; pointer-events: none;
+    }
+    .orb1 { width: 500px; height: 500px; background: #FF3CAC; top: -150px; left: -150px; animation: orbFloat 12s ease-in-out infinite alternate; }
+    .orb2 { width: 400px; height: 400px; background: #2B86C5; bottom: -100px; right: -100px; animation: orbFloat 15s ease-in-out infinite alternate-reverse; }
+
+    .login-box {
+      background: rgba(26,26,46,0.9);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 28px;
+      padding: 3rem 2.5rem;
+      width: 100%; max-width: 420px;
+      position: relative; z-index: 10;
+      box-shadow: 0 30px 80px rgba(0,0,0,0.5);
+      animation: slideUp 0.6s ease;
+    }
+    .login-icon {
+      width: 70px; height: 70px; border-radius: 50%;
+      background: var(--grad);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.8rem; margin: 0 auto 1.5rem;
+      box-shadow: 0 8px 30px rgba(255,60,172,0.35);
+    }
+    .login-brand {
+      text-align: center; margin-bottom: 0.3rem;
+      font-family: 'Boogaloo', cursive; font-size: 1.8rem;
+      background: var(--grad);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .login-sub {
+      text-align: center; color: #777; font-size: 0.88rem;
+      margin-bottom: 2rem; text-transform: uppercase; letter-spacing: 0.1em;
+    }
+
+    .form-group { margin-bottom: 1.2rem; }
+    .form-group label { display: block; font-weight: 700; font-size: 0.88rem; color: #aaa; margin-bottom: 0.4rem; }
+    .input-wrap { position: relative; }
+    .input-wrap i {
+      position: absolute; left: 1rem; top: 50%; transform: translateY(-50%);
+      color: #555; font-size: 0.9rem;
+    }
+    .input-wrap input {
+      width: 100%; padding: 0.85rem 1rem 0.85rem 2.8rem;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px; color: #f0f0ff;
+      font-family: 'Nunito', sans-serif; font-size: 0.97rem;
+      outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .input-wrap input:focus {
+      border-color: rgba(255,60,172,0.5);
+      box-shadow: 0 0 0 3px rgba(255,60,172,0.12);
+    }
+    .toggle-pw {
+      position: absolute; right: 1rem; top: 50%; transform: translateY(-50%);
+      cursor: pointer; color: #555; transition: color 0.2s;
+    }
+    .toggle-pw:hover { color: #aaa; }
+
+    .btn-login {
+      width: 100%; padding: 0.95rem;
+      background: var(--grad);
+      color: #fff; font-family: 'Nunito', sans-serif;
+      font-weight: 800; font-size: 1rem;
+      border: none; border-radius: 14px;
+      cursor: pointer; margin-top: 0.5rem;
+      transition: opacity 0.2s, transform 0.2s;
+      box-shadow: 0 6px 25px rgba(255,60,172,0.35);
+    }
+    .btn-login:hover { opacity: 0.9; transform: translateY(-2px); }
+    .btn-login:active { transform: translateY(0); }
+
+    .back-link {
+      display: block; text-align: center; margin-top: 1.5rem;
+      color: #666; text-decoration: none; font-size: 0.88rem;
+      transition: color 0.2s;
+    }
+    .back-link:hover { color: #aaa; }
+
+    /* Flash */
+    .flash {
+      padding: 0.75rem 1rem; border-radius: 10px;
+      margin-bottom: 1rem; font-weight: 700; font-size: 0.9rem;
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+    .flash.danger  { background: rgba(255,60,60,0.12); border: 1px solid rgba(255,60,60,0.3); color: #ff7c7c; }
+    .flash.warning { background: rgba(255,200,0,0.12); border: 1px solid rgba(255,200,0,0.3); color: #ffd600; }
+    .flash.info    { background: rgba(43,134,197,0.12); border: 1px solid rgba(43,134,197,0.3); color: #70c8ff; }
+
+    @keyframes orbFloat { from { transform: translateY(0); } to { transform: translateY(40px); } }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes fadeUp  { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+  </style>
+</head>
+<body>
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
+
+  <div class="login-box">
+    <div class="login-icon"><i class="fa fa-shield-halved"></i></div>
+    <div class="login-brand">ZingThings</div>
+    <div class="login-sub">Admin Portal</div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for cat, msg in messages %}
+        <div class="flash {{ cat }}">
+          {% if cat == 'danger' %}<i class="fa fa-circle-xmark"></i>
+          {% elif cat == 'warning' %}<i class="fa fa-triangle-exclamation"></i>
+          {% else %}<i class="fa fa-circle-info"></i>{% endif %}
+          {{ msg }}
+        </div>
+      {% endfor %}
+    {% endwith %}
+
+    <form method="POST">
+      <div class="form-group">
+        <label>Username</label>
+        <div class="input-wrap">
+          <i class="fa fa-user"></i>
+          <input type="text" name="username" placeholder="Enter admin username" required autocomplete="username"/>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <div class="input-wrap">
+          <i class="fa fa-lock"></i>
+          <input type="password" name="password" id="pw" placeholder="Enter password" required autocomplete="current-password"/>
+          <span class="toggle-pw" onclick="togglePw()"><i class="fa fa-eye" id="eye-icon"></i></span>
+        </div>
+      </div>
+      <button type="submit" class="btn-login"><i class="fa fa-right-to-bracket"></i> &nbsp;Sign In</button>
+    </form>
+    <a href="{{ url_for('index') }}" class="back-link">← Back to ZingThings</a>
+  </div>
+
+  <script>
+    function togglePw() {
+      const pw = document.getElementById('pw');
+      const icon = document.getElementById('eye-icon');
+      if (pw.type === 'password') {
+        pw.type = 'text';
+        icon.className = 'fa fa-eye-slash';
+      } else {
+        pw.type = 'password';
+        icon.className = 'fa fa-eye';
+      }
+    }
+  </script>
+</body>
+</html>

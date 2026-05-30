@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% block title %}About — ZingThings{% endblock %}
+{% block extra_head %}
+<style>
+  .about-wrap { max-width: 860px; margin: 0 auto; padding: 5rem 2rem; }
+  .about-title {
+    font-family: 'Boogaloo', cursive;
+    font-size: clamp(2.5rem, 6vw, 5rem);
+    background: linear-gradient(135deg, var(--zing-blue), var(--zing-pink));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    margin-bottom: 1rem;
+  }
+  .about-lead {
+    font-size: 1.2rem; color: #bbb; line-height: 1.8; margin-bottom: 2.5rem;
+  }
+  .about-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 2.5rem;
+  }
+  .about-card {
+    background: var(--zing-card); border-radius: 18px; padding: 2rem;
+    border: 1px solid rgba(255,255,255,0.07);
+    animation: fadeUp 0.6s ease both;
+  }
+  .about-card h3 { font-size: 1.1rem; font-weight: 800; margin-bottom: 0.5rem; }
+  .about-card p { color: #888; font-size: 0.9rem; line-height: 1.7; }
+  .about-num { font-family:'Boogaloo',cursive; font-size:3rem; background:var(--grad);
+    -webkit-background-clip:text;-webkit-text-fill-color:transparent; margin-bottom:0.3rem; }
+  @media(max-width:600px){ .about-grid{grid-template-columns:1fr;} }
+</style>
+{% endblock %}
+{% block content %}
+<div class="about-wrap">
+  <h1 class="about-title">About ZingThings 💡</h1>
+  <p class="about-lead">
+    We're on a mission to put the <strong style="color:#fff">ZAP</strong> back into playtime!
+    Founded in 2020, ZingThings curates the coolest, most creative toys from around the world —
+    from mindfulness fidgets to high-tech mini-drones. Every product we carry is handpicked for
+    quality, fun, and that unmistakable <em>zing</em> factor.
+  </p>
+  <hr style="border-color:rgba(255,255,255,0.07);margin-bottom:2.5rem"/>
+  <div class="about-grid">
+    <div class="about-card" style="animation-delay:0.1s">
+      <div class="about-num">8+</div>
+      <h3>Product Categories</h3>
+      <p>Fidgets, slimes, drones, pop-its and more — curated for every kind of curious mind.</p>
+    </div>
+    <div class="about-card" style="animation-delay:0.2s">
+      <div class="about-num">10k+</div>
+      <h3>Happy Customers</h3>
+      <p>Kids, adults, and everything in between — our toys bring joy to everyone.</p>
+    </div>
+    <div class="about-card" style="animation-delay:0.3s">
+      <div class="about-num">100%</div>
+      <h3>Safety Certified</h3>
+      <p>Every product meets international safety standards. Play safe, play zing.</p>
+    </div>
+    <div class="about-card" style="animation-delay:0.4s">
+      <div class="about-num">24h</div>
+      <h3>Customer Support</h3>
+      <p>Got a question? Our team is here around the clock to help you out.</p>
+    </div>
+  </div>
+</div>
+{% endblock %}

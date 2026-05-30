@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% block title %}Shop — ZingThings{% endblock %}
+{% block extra_head %}
+<style>
+  .shop-header { text-align: center; padding: 4rem 2rem 2rem; }
+  .shop-header h1 { font-family: 'Boogaloo', cursive; font-size: clamp(2.5rem, 6vw, 5rem); background: linear-gradient(135deg, var(--zing-yellow), var(--zing-orange)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .shop-header p { color: #888; margin-top: 0.5rem; font-size: 1rem; }
+  .category-filters { display: flex; flex-wrap: wrap; gap: 0.6rem; justify-content: center; padding: 0 2rem 2rem; }
+  .cat-btn { padding: 0.5rem 1.3rem; border-radius: 99px; background: var(--zing-card); color: #aaa; border: 1px solid rgba(255,255,255,0.1); font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 0.9rem; cursor: pointer; text-decoration: none; transition: all 0.2s; }
+  .cat-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
+  .cat-btn.active { background: linear-gradient(135deg, var(--zing-pink), var(--zing-purple)); color: #fff; border-color: transparent; box-shadow: 0 4px 20px rgba(255,60,172,0.3); }
+  .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 1.5rem; max-width: 1300px; margin: 0 auto; padding: 1rem 2rem 4rem; }
+  .product-card { background: var(--zing-card); border: 1px solid rgba(255,255,255,0.07); border-radius: 20px; overflow: hidden; transition: transform 0.3s, box-shadow 0.3s; animation: fadeUp 0.5s ease both; display: flex; flex-direction: column; }
+  .product-card:hover { transform: translateY(-6px); box-shadow: 0 18px 45px rgba(0,0,0,0.5); }
+  .pc-top { height: 180px; overflow: hidden; position: relative; }
+  .pc-top img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s; }
+  .product-card:hover .pc-top img { transform: scale(1.07); }
+  .pc-top-fallback { height: 180px; background: linear-gradient(135deg, rgba(120,75,160,0.3), rgba(43,134,197,0.2)); display: flex; align-items: center; justify-content: center; font-size: 3.5rem; }
+  .pc-body { padding: 1.2rem; flex: 1; }
+  .pc-name { font-weight: 800; font-size: 0.97rem; margin-bottom: 0.3rem; }
+  .pc-desc { font-size: 0.8rem; color: #888; margin-bottom: 0.6rem; line-height: 1.5; }
+  .pc-cat { display: inline-block; font-size: 0.72rem; font-weight: 700; padding: 0.2rem 0.7rem; border-radius: 99px; background: rgba(255,255,255,0.07); color: #aaa; margin-bottom: 0.8rem; }
+  .pc-footer { display: flex; align-items: center; justify-content: space-between; }
+  .pc-price { font-weight: 900; color: var(--zing-yellow); font-size: 1.15rem; }
+  .pc-stock { font-size: 0.78rem; color: #666; }
+  .pc-stock.low { color: var(--zing-orange); }
+  .btn-add { display: block; width: calc(100% - 2.4rem); margin: 0.8rem 1.2rem 1.2rem; padding: 0.7rem; border-radius: 12px; background: linear-gradient(135deg, var(--zing-pink), var(--zing-purple)); color: #fff; text-align: center; font-weight: 800; font-size: 0.9rem; border: none; cursor: pointer; transition: opacity 0.2s, transform 0.2s; }
+  .btn-add:hover { opacity: 0.85; transform: scale(1.02); }
+  .empty { text-align: center; padding: 4rem; color: #555; font-size: 1.2rem; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="shop-header">
+  <h1>🛍️ Our Shop</h1>
+  <p>{{ products|length }} awesome toys ready for you</p>
+</div>
+<div class="category-filters">
+  {% for cat in categories %}
+  <a href="{{ url_for('shop', category=cat) }}" class="cat-btn {{ 'active' if cat == active }}">{{ cat }}</a>
+  {% endfor %}
+</div>
+{% if products %}
+<div class="products-grid">
+  {% for p in products %}
+  <div class="product-card" style="animation-delay:{{ loop.index0 * 0.06 }}s">
+    <div class="pc-top">
+      {% if p.img %}
+        <img src="{{ p.img }}" alt="{{ p.name }}" loading="lazy" onerror="this.parentElement.innerHTML='<div style=\'height:180px;display:flex;align-items:center;justify-content:center;font-size:3rem\'>{{ p.emoji }}</div>'">
+      {% else %}
+        <div class="pc-top-fallback">{{ p.emoji }}</div>
+      {% endif %}
+    </div>
+    <div class="pc-body">
+      <div class="pc-name">{{ p.name }}</div>
+      {% if p.desc %}<div class="pc-desc">{{ p.desc }}</div>{% endif %}
+      <span class="pc-cat">{{ p.category }}</span>
+      <div class="pc-footer">
+        <span class="pc-price">${{ '%.2f'|format(p.price) }}</span>
+        <span class="pc-stock {{ 'low' if p.stock < 25 }}">{{ '⚠️ Low stock' if p.stock < 25 else '✅ In stock' }}</span>
+      </div>
+    </div>
+    <button class="btn-add" onclick="addToCart({{ p.id }}, '{{ p.name }}')">🛒 Add to Cart</button>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+  <div class="empty">No products in this category yet 😢</div>
+{% endif %}
+{% endblock %}

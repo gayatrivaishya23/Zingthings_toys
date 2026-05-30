@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+{% block title %}Reviews — ZingThings{% endblock %}
+{% block extra_head %}
+<style>
+  .page-header { text-align:center; padding:4rem 2rem 2rem; }
+  .page-header h1 { font-family:'Boogaloo',cursive; font-size:clamp(2.5rem,6vw,5rem); background:linear-gradient(135deg,var(--zing-yellow),var(--zing-orange)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+  .page-header p { color:#888; margin-top:0.5rem; }
+
+  .feedback-layout { display:grid; grid-template-columns:1fr 380px; gap:2rem; max-width:1100px; margin:0 auto; padding:1rem 2rem 4rem; }
+  @media(max-width:800px){ .feedback-layout { grid-template-columns:1fr; } }
+
+  /* Reviews list */
+  .reviews-list { display:flex; flex-direction:column; gap:1.2rem; }
+  .review-card { background:var(--zing-card); border:1px solid rgba(255,255,255,0.07); border-radius:18px; padding:1.6rem; animation:fadeUp 0.5s ease both; transition:transform 0.2s; }
+  .review-card:hover { transform:translateY(-3px); }
+  .rc-top { display:flex; align-items:center; gap:1rem; margin-bottom:0.8rem; }
+  .rc-avatar { width:44px; height:44px; border-radius:50%; background:linear-gradient(135deg,var(--zing-pink),var(--zing-purple)); display:flex; align-items:center; justify-content:center; font-weight:900; font-size:1.1rem; flex-shrink:0; }
+  .rc-meta { flex:1; }
+  .rc-name { font-weight:800; font-size:0.97rem; }
+  .rc-product { font-size:0.78rem; color:#888; margin-top:0.1rem; }
+  .rc-stars { color:var(--zing-yellow); font-size:1rem; letter-spacing:1px; }
+  .rc-comment { color:#ccc; font-size:0.93rem; line-height:1.65; }
+
+  /* Stats bar */
+  .rating-summary { background:var(--zing-card); border:1px solid rgba(255,255,255,0.07); border-radius:18px; padding:1.5rem; margin-bottom:1.5rem; display:flex; align-items:center; gap:2rem; }
+  .rs-big { text-align:center; }
+  .rs-num { font-family:'Boogaloo',cursive; font-size:3.5rem; color:var(--zing-yellow); line-height:1; }
+  .rs-stars { color:var(--zing-yellow); font-size:1.2rem; }
+  .rs-count { font-size:0.8rem; color:#888; margin-top:0.2rem; }
+  .rs-bars { flex:1; }
+  .rbar-row { display:flex; align-items:center; gap:0.6rem; margin-bottom:0.4rem; font-size:0.82rem; }
+  .rbar-label { color:#aaa; width:40px; text-align:right; }
+  .rbar-track { flex:1; height:8px; background:rgba(255,255,255,0.07); border-radius:99px; overflow:hidden; }
+  .rbar-fill { height:100%; background:linear-gradient(135deg,var(--zing-yellow),var(--zing-orange)); border-radius:99px; }
+  .rbar-count { color:#888; width:20px; }
+
+  /* Write Review */
+  .write-review { background:var(--zing-card); border:1px solid rgba(255,255,255,0.07); border-radius:20px; padding:2rem; position:sticky; top:88px; }
+  .wr-title { font-family:'Boogaloo',cursive; font-size:1.5rem; margin-bottom:1.4rem; background:var(--grad); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+  .form-group { display:flex; flex-direction:column; gap:0.4rem; margin-bottom:1rem; }
+  .form-group label { font-size:0.82rem; font-weight:700; color:#aaa; }
+  .form-group input, .form-group select, .form-group textarea { background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.12); border-radius:10px; padding:0.7rem 1rem; color:#fff; font-family:'Nunito',sans-serif; font-size:0.93rem; outline:none; transition:border-color 0.2s; resize:vertical; }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color:var(--zing-pink); }
+  .form-group select option { background:#1a1a2e; }
+  .star-picker { display:flex; gap:0.4rem; flex-direction:row-reverse; justify-content:flex-end; }
+  .star-picker input { display:none; }
+  .star-picker label { font-size:1.8rem; color:#333; cursor:pointer; transition:color 0.1s; }
+  .star-picker input:checked ~ label, .star-picker label:hover, .star-picker label:hover ~ label { color:var(--zing-yellow); }
+  .btn-submit { display:block; width:100%; padding:0.85rem; border-radius:14px; background:linear-gradient(135deg,var(--zing-pink),var(--zing-purple)); color:#fff; font-weight:800; font-size:1rem; border:none; cursor:pointer; transition:opacity 0.2s, transform 0.2s; margin-top:0.5rem; }
+  .btn-submit:hover { opacity:0.88; transform:translateY(-2px); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>⭐ Customer Reviews</h1>
+  <p>Real toys, real smiles, real reviews.</p>
+</div>
+
+<div class="feedback-layout">
+  <div>
+    <!-- Rating summary -->
+    {% set avg = (feedbacks | map(attribute='rating') | sum / feedbacks|length) if feedbacks else 0 %}
+    <div class="rating-summary">
+      <div class="rs-big">
+        <div class="rs-num">{{ '%.1f'|format(avg) }}</div>
+        <div class="rs-stars">{% for i in range(avg|int) %}★{% endfor %}{% if avg % 1 >= 0.5 %}☆{% endif %}</div>
+        <div class="rs-count">{{ feedbacks|length }} reviews</div>
+      </div>
+      <div class="rs-bars">
+        {% for star in [5,4,3,2,1] %}
+          {% set cnt = feedbacks | selectattr('rating','eq',star) | list | length %}
+          {% set pct = (cnt / feedbacks|length * 100) if feedbacks else 0 %}
+          <div class="rbar-row">
+            <span class="rbar-label">{{ star }}★</span>
+            <div class="rbar-track"><div class="rbar-fill" style="width:{{ pct }}%"></div></div>
+            <span class="rbar-count">{{ cnt }}</span>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Reviews -->
+    <div class="reviews-list">
+      {% for fb in feedbacks %}
+      <div class="review-card" style="animation-delay:{{ loop.index0 * 0.07 }}s">
+        <div class="rc-top">
+          <div class="rc-avatar">{{ fb.name[0] }}</div>
+          <div class="rc-meta">
+            <div class="rc-name">{{ fb.name }}</div>
+            {% if fb.product %}<div class="rc-product">Purchased: {{ fb.product }}</div>{% endif %}
+          </div>
+          <div class="rc-stars">{% for i in range(fb.rating) %}★{% endfor %}</div>
+        </div>
+        <div class="rc-comment">{{ fb.comment }}</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Write Review -->
+  <div class="write-review">
+    <div class="wr-title">✍️ Write a Review</div>
+    <form method="POST">
+      <div class="form-group">
+        <label>Your Name</label>
+        <input type="text" name="name" placeholder="Priya S." required>
+      </div>
+      <div class="form-group">
+        <label>Product</label>
+        <select name="product">
+          <option value="">— Select a product —</option>
+          {% for p in products %}
+          <option>{{ p.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Rating</label>
+        <div class="star-picker">
+          {% for i in [5,4,3,2,1] %}
+          <input type="radio" name="rating" id="star{{ i }}" value="{{ i }}" {{ 'checked' if i == 5 }}>
+          <label for="star{{ i }}">★</label>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Your Review</label>
+        <textarea name="comment" rows="4" placeholder="Tell us what you think..." required></textarea>
+      </div>
+      <button class="btn-submit" type="submit">⭐ Submit Review</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

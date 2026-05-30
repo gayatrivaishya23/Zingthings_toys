@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>{% block title %}ZingThings{% endblock %}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Boogaloo&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <style>
+    :root {
+      --zing-yellow: #FFD600;
+      --zing-orange: #FF6B35;
+      --zing-pink:   #FF3CAC;
+      --zing-purple: #784BA0;
+      --zing-blue:   #2B86C5;
+      --zing-dark:   #0f0f1a;
+      --zing-card:   #1a1a2e;
+      --zing-light:  #f0f0ff;
+      --grad: linear-gradient(135deg, var(--zing-pink), var(--zing-purple), var(--zing-blue));
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Nunito', sans-serif; background: var(--zing-dark); color: var(--zing-light); min-height: 100vh; overflow-x: hidden; }
+
+    /* SPLASH */
+    #splash { position: fixed; inset: 0; z-index: 9999; background: var(--zing-dark); display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.6s ease, transform 0.6s ease; }
+    #splash.hide { opacity: 0; transform: scale(1.05); pointer-events: none; }
+    .splash-logo { font-family: 'Boogaloo', cursive; font-size: clamp(3rem, 10vw, 7rem); background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: splashPulse 1s ease-in-out infinite alternate; }
+    .splash-tagline { font-size: 1.1rem; color: #aaa; margin-top: 0.5rem; letter-spacing: 0.2em; text-transform: uppercase; animation: fadeUp 0.8s ease 0.4s both; }
+    .splash-bar { margin-top: 2.5rem; width: 220px; height: 5px; background: #222; border-radius: 99px; overflow: hidden; }
+    .splash-fill { height: 100%; width: 0; background: var(--grad); border-radius: 99px; animation: fillBar 1.8s ease forwards; }
+    .splash-dots { margin-top: 1rem; display: flex; gap: 8px; }
+    .splash-dots span { width: 10px; height: 10px; border-radius: 50%; background: var(--grad); animation: dotBounce 0.6s ease infinite alternate; }
+    .splash-dots span:nth-child(2) { animation-delay: 0.15s; }
+    .splash-dots span:nth-child(3) { animation-delay: 0.3s; }
+
+    /* NAVBAR */
+    nav { position: sticky; top: 0; z-index: 100; background: rgba(15,15,26,0.92); backdrop-filter: blur(18px); border-bottom: 1px solid rgba(255,255,255,0.07); padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; height: 68px; }
+    .nav-brand { font-family: 'Boogaloo', cursive; font-size: 2rem; background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-decoration: none; }
+    .nav-links { display: flex; gap: 0.5rem; align-items: center; }
+    .nav-links a { color: #ccc; text-decoration: none; padding: 0.45rem 1rem; border-radius: 8px; font-weight: 700; font-size: 0.95rem; transition: all 0.2s; }
+    .nav-links a:hover, .nav-links a.active { background: rgba(255,255,255,0.1); color: #fff; }
+    .btn-admin { background: var(--grad) !important; color: #fff !important; padding: 0.45rem 1.2rem !important; border-radius: 30px !important; font-weight: 800 !important; }
+    .cart-link { position: relative; }
+    .cart-badge { position: absolute; top: -6px; right: -6px; background: var(--zing-pink); color: #fff; font-size: 0.65rem; font-weight: 900; width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; display: none; }
+    .cart-badge.show { display: flex; }
+
+    /* FLASH */
+    .flashes { padding: 0.75rem 2rem; }
+    .flash { padding: 0.8rem 1.4rem; border-radius: 10px; margin-bottom: 0.5rem; font-weight: 700; display: flex; align-items: center; gap: 0.6rem; animation: fadeUp 0.4s ease; }
+    .flash.success { background: rgba(0,200,100,0.15); border: 1px solid rgba(0,200,100,0.3); color: #4fffb0; }
+    .flash.danger  { background: rgba(255,60,60,0.15);  border: 1px solid rgba(255,60,60,0.3);  color: #ff7c7c; }
+    .flash.warning { background: rgba(255,200,0,0.15);  border: 1px solid rgba(255,200,0,0.3);  color: #ffd600; }
+    .flash.info    { background: rgba(43,134,197,0.15); border: 1px solid rgba(43,134,197,0.3); color: #70c8ff; }
+
+    footer { text-align: center; padding: 2.5rem 1rem; border-top: 1px solid rgba(255,255,255,0.07); color: #555; font-size: 0.9rem; margin-top: 4rem; }
+    footer span { background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800; }
+
+    @keyframes splashPulse { from { transform: scale(1); } to { transform: scale(1.04); } }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes fillBar { 0% { width: 0; } 100% { width: 100%; } }
+    @keyframes dotBounce { from { transform: translateY(0); } to { transform: translateY(-10px); } }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--zing-dark); }
+    ::-webkit-scrollbar-thumb { background: var(--zing-purple); border-radius: 4px; }
+  </style>
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+{% if not request.path.startswith('/admin') %}
+<div id="splash">
+  <div class="splash-logo">ZingThings</div>
+  <div class="splash-tagline">Toys that make you smile</div>
+  <div class="splash-bar"><div class="splash-fill"></div></div>
+  <div class="splash-dots"><span></span><span></span><span></span></div>
+</div>
+{% endif %}
+
+<nav>
+  <a href="{{ url_for('index') }}" class="nav-brand">⚡ ZingThings</a>
+  <div class="nav-links">
+    <a href="{{ url_for('index') }}"  class="{{ 'active' if request.endpoint == 'index' }}">Home</a>
+    <a href="{{ url_for('shop') }}"   class="{{ 'active' if request.endpoint == 'shop' }}">Shop</a>
+    <a href="{{ url_for('feedback') }}" class="{{ 'active' if request.endpoint == 'feedback' }}">Reviews</a>
+    <a href="{{ url_for('about') }}"  class="{{ 'active' if request.endpoint == 'about' }}">About</a>
+    <a href="{{ url_for('cart') }}" class="cart-link {{ 'active' if request.endpoint == 'cart' }}" id="nav-cart-link">
+      🛒 Cart <span class="cart-badge" id="cart-badge">0</span>
+    </a>
+    {% if session.get('admin_logged_in') %}
+      <a href="{{ url_for('admin_dashboard') }}" class="btn-admin"><i class="fa fa-shield-halved"></i> Admin</a>
+      <a href="{{ url_for('admin_logout') }}" style="color:#ff7c7c">Logout</a>
+    {% else %}
+      <a href="{{ url_for('admin_login') }}" class="btn-admin"><i class="fa fa-lock"></i> Admin</a>
+    {% endif %}
+  </div>
+</nav>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div class="flashes">
+      {% for category, message in messages %}
+        <div class="flash {{ category }}">
+          {% if category == 'success' %}<i class="fa fa-circle-check"></i>
+          {% elif category == 'danger' %}<i class="fa fa-circle-xmark"></i>
+          {% elif category == 'warning' %}<i class="fa fa-triangle-exclamation"></i>
+          {% else %}<i class="fa fa-circle-info"></i>{% endif %}
+          {{ message }}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+
+{% block content %}{% endblock %}
+
+<footer>
+  <p>Made with ❤️ by <span>ZingThings</span> &nbsp;·&nbsp; © 2024 All rights reserved</p>
+</footer>
+
+<script>
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      const s = document.getElementById('splash');
+      if (s) { s.classList.add('hide'); setTimeout(() => s.remove(), 700); }
+    }, 2000);
+  });
+  setTimeout(() => {
+    document.querySelectorAll('.flash').forEach(el => {
+      el.style.transition = 'opacity 0.5s'; el.style.opacity = '0';
+      setTimeout(() => el.remove(), 500);
+    });
+  }, 4000);
+
+  // Cart badge
+  function updateCartBadge(count) {
+    const badge = document.getElementById('cart-badge');
+    if (!badge) return;
+    badge.textContent = count;
+    if (count > 0) badge.classList.add('show'); else badge.classList.remove('show');
+  }
+  fetch('/api/cart/count').then(r=>r.json()).then(d=>updateCartBadge(d.count)).catch(()=>{});
+  window.updateCartBadge = updateCartBadge;
+
+  // Global addToCart
+  window.addToCart = function(id, name) {
+    fetch('/api/cart/add', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({id})})
+      .then(r=>r.json()).then(d=>{
+        if(d.success) { updateCartBadge(d.count); showToast(`✅ "${name}" added to cart!`); }
+      });
+  };
+  function showToast(msg) {
+    const toast = document.createElement('div');
+    toast.style.cssText = `position:fixed;bottom:2rem;right:2rem;z-index:9000;background:linear-gradient(135deg,#FF3CAC,#784BA0);color:#fff;padding:0.9rem 1.5rem;border-radius:14px;font-weight:800;font-size:0.95rem;box-shadow:0 8px 30px rgba(255,60,172,0.4);animation:fadeUp 0.3s ease;`;
+    toast.textContent = msg;
+    document.body.appendChild(toast);
+    setTimeout(() => { toast.style.opacity='0'; toast.style.transition='opacity 0.4s'; setTimeout(()=>toast.remove(),400); }, 2500);
+  }
+</script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

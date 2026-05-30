@@ -1,0 +1,214 @@
+{% extends 'base.html' %}
+{% block title %}Checkout — ZingThings{% endblock %}
+{% block extra_head %}
+<style>
+  .page-header { text-align: center; padding: 3rem 2rem 1.5rem; }
+  .page-header h1 { font-family: 'Boogaloo', cursive; font-size: clamp(2.5rem,6vw,4rem); background: linear-gradient(135deg,var(--zing-pink),var(--zing-purple)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+
+  /* STEPS */
+  .steps { display: flex; justify-content: center; gap: 0; max-width: 500px; margin: 0 auto 2rem; }
+  .step { flex: 1; text-align: center; position: relative; }
+  .step::after { content:''; position:absolute; top:18px; left:50%; width:100%; height:2px; background:rgba(255,255,255,0.1); z-index:0; }
+  .step:last-child::after { display:none; }
+  .step-dot { width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:0.9rem; margin:0 auto 0.4rem; position:relative; z-index:1; transition:all 0.3s; }
+  .step.active .step-dot { background: linear-gradient(135deg,var(--zing-pink),var(--zing-purple)); color:#fff; box-shadow:0 4px 20px rgba(255,60,172,0.4); }
+  .step.done .step-dot { background: #4fffb0; color: #000; }
+  .step.pending .step-dot { background: rgba(255,255,255,0.1); color: #555; }
+  .step-label { font-size: 0.75rem; color: #888; font-weight: 700; }
+  .step.active .step-label { color: #fff; }
+
+  .checkout-layout { display: grid; grid-template-columns: 1fr 320px; gap: 2rem; max-width: 1050px; margin: 0 auto; padding: 0 2rem 4rem; }
+  @media(max-width:750px){ .checkout-layout { grid-template-columns:1fr; } }
+
+  .form-section { background: var(--zing-card); border: 1px solid rgba(255,255,255,0.07); border-radius: 20px; padding: 2rem; margin-bottom: 1.5rem; }
+  .form-section h3 { font-family:'Boogaloo',cursive; font-size:1.4rem; margin-bottom:1.2rem; color:var(--zing-yellow); }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .form-row.single { grid-template-columns: 1fr; }
+  .form-group { display: flex; flex-direction: column; gap: 0.4rem; }
+  .form-group label { font-size: 0.83rem; font-weight: 700; color: #aaa; }
+  .form-group input, .form-group select { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; padding: 0.7rem 1rem; color: #fff; font-family:'Nunito',sans-serif; font-size: 0.95rem; outline: none; transition: border-color 0.2s; }
+  .form-group input:focus, .form-group select:focus { border-color: var(--zing-pink); }
+  .form-group select option { background: #1a1a2e; }
+
+  /* Card input styling */
+  .card-fields { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
+  .card-number-wrap { position: relative; }
+  .card-icon { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-size: 1.2rem; }
+
+  /* Payment tabs */
+  .pay-tabs { display: flex; gap: 0.6rem; margin-bottom: 1.4rem; }
+  .pay-tab { padding: 0.5rem 1.2rem; border-radius: 10px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #aaa; font-weight: 700; font-size: 0.88rem; cursor: pointer; transition: all 0.2s; }
+  .pay-tab.active { background: linear-gradient(135deg,var(--zing-pink),var(--zing-purple)); color:#fff; border-color: transparent; }
+  .pay-panel { display: none; }
+  .pay-panel.active { display: block; }
+
+  /* Order summary sidebar */
+  .order-summary { background: var(--zing-card); border: 1px solid rgba(255,255,255,0.07); border-radius: 20px; padding: 1.8rem; height: fit-content; position: sticky; top: 88px; }
+  .os-title { font-family:'Boogaloo',cursive; font-size:1.4rem; margin-bottom:1.2rem; background:var(--grad); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+  .os-item { display:flex; justify-content:space-between; align-items:center; font-size:0.88rem; margin-bottom:0.6rem; color:#ccc; }
+  .os-item .qty-badge { background:rgba(255,255,255,0.1); border-radius:4px; padding:1px 6px; font-size:0.78rem; margin-right:4px; }
+  .os-divider { border:none; border-top:1px solid rgba(255,255,255,0.08); margin:1rem 0; }
+  .os-row { display:flex; justify-content:space-between; font-size:0.92rem; color:#aaa; margin-bottom:0.5rem; }
+  .os-total { display:flex; justify-content:space-between; font-weight:900; font-size:1.1rem; color:#fff; padding-top:0.7rem; border-top:1px solid rgba(255,255,255,0.1); }
+  .os-total span:last-child { color:var(--zing-yellow); }
+  .btn-pay { display:block; width:100%; padding:1rem; border-radius:14px; background:linear-gradient(135deg,var(--zing-pink),var(--zing-purple)); color:#fff; text-align:center; font-weight:800; font-size:1.05rem; border:none; cursor:pointer; margin-top:1.4rem; transition:opacity 0.2s, transform 0.2s; }
+  .btn-pay:hover { opacity:0.88; transform:translateY(-2px); }
+  .btn-pay:disabled { opacity:0.5; transform:none; cursor:not-allowed; }
+  .secure-badge { display:flex; align-items:center; gap:0.5rem; justify-content:center; margin-top:0.8rem; font-size:0.78rem; color:#555; }
+
+  .processing { display:none; text-align:center; padding:1rem; }
+  .spinner { width:40px; height:40px; border:4px solid rgba(255,255,255,0.1); border-top-color:var(--zing-pink); border-radius:50%; animation:spin 0.8s linear infinite; margin:0 auto 0.8rem; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>💳 Checkout</h1>
+</div>
+
+<!-- Steps -->
+<div class="steps" style="padding:0 2rem">
+  <div class="step active"><div class="step-dot">1</div><div class="step-label">Shipping</div></div>
+  <div class="step active" id="step2"><div class="step-dot">2</div><div class="step-label">Payment</div></div>
+  <div class="step pending" id="step3"><div class="step-dot">3</div><div class="step-label">Confirm</div></div>
+</div>
+
+<div class="checkout-layout">
+  <div>
+    <!-- Shipping -->
+    <div class="form-section">
+      <h3>📦 Shipping Info</h3>
+      <div class="form-row">
+        <div class="form-group"><label>First Name</label><input type="text" id="fname" placeholder="Priya" required></div>
+        <div class="form-group"><label>Last Name</label><input type="text" id="lname" placeholder="Sharma"></div>
+      </div>
+      <div class="form-row single">
+        <div class="form-group"><label>Email</label><input type="email" id="email" placeholder="priya@email.com"></div>
+      </div>
+      <div class="form-row single">
+        <div class="form-group"><label>Address</label><input type="text" id="addr" placeholder="123 MG Road, Flat 4B"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>City</label><input type="text" id="city" placeholder="Mumbai"></div>
+        <div class="form-group"><label>PIN Code</label><input type="text" id="pin" placeholder="400001"></div>
+      </div>
+      <div class="form-row single">
+        <div class="form-group">
+          <label>State</label>
+          <select id="state">
+            <option>Maharashtra</option><option>Delhi</option><option>Karnataka</option><option>Tamil Nadu</option><option>Gujarat</option><option>Rajasthan</option><option>Uttar Pradesh</option><option>West Bengal</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Payment -->
+    <div class="form-section">
+      <h3>💰 Payment Method</h3>
+      <div class="pay-tabs">
+        <div class="pay-tab active" onclick="switchTab('card',this)">💳 Card</div>
+        <div class="pay-tab" onclick="switchTab('upi',this)">📱 UPI</div>
+        <div class="pay-tab" onclick="switchTab('cod',this)">💵 Cash on Delivery</div>
+      </div>
+
+      <!-- Card -->
+      <div class="pay-panel active" id="panel-card">
+        <div class="form-row single">
+          <div class="form-group">
+            <label>Card Number</label>
+            <div class="card-number-wrap">
+              <input type="text" id="cardnum" placeholder="1234 5678 9012 3456" maxlength="19" oninput="formatCard(this)">
+              <span class="card-icon" id="card-icon">💳</span>
+            </div>
+          </div>
+        </div>
+        <div class="card-fields">
+          <div class="form-group" style="grid-column:span 2"><label>Cardholder Name</label><input type="text" id="cardname" placeholder="PRIYA SHARMA"></div>
+          <div class="form-group"><label>Expiry</label><input type="text" id="expiry" placeholder="MM/YY" maxlength="5" oninput="formatExpiry(this)"></div>
+        </div>
+        <div class="form-row" style="margin-top:0.5rem">
+          <div class="form-group"><label>CVV</label><input type="password" id="cvv" placeholder="•••" maxlength="4"></div>
+        </div>
+      </div>
+
+      <!-- UPI -->
+      <div class="pay-panel" id="panel-upi">
+        <div class="form-row single">
+          <div class="form-group"><label>UPI ID</label><input type="text" id="upi" placeholder="priya@okaxis"></div>
+        </div>
+        <p style="color:#888;font-size:0.85rem;margin-top:0.5rem">We support PhonePe, Google Pay, Paytm, BHIM & more.</p>
+      </div>
+
+      <!-- COD -->
+      <div class="pay-panel" id="panel-cod">
+        <div style="background:rgba(255,214,0,0.08);border:1px solid rgba(255,214,0,0.25);border-radius:12px;padding:1.2rem;margin-top:0.5rem">
+          <p style="font-weight:700;color:var(--zing-yellow)">💵 Pay when your toys arrive!</p>
+          <p style="color:#aaa;font-size:0.88rem;margin-top:0.4rem">Cash on Delivery available. An extra ₹49 COD fee applies.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Summary -->
+  <div class="order-summary">
+    <div class="os-title">Order Summary</div>
+    {% for item in items %}
+    <div class="os-item">
+      <span><span class="qty-badge">×{{ item.qty }}</span> {{ item.name }}</span>
+      <span>${{ '%.2f'|format(item.subtotal) }}</span>
+    </div>
+    {% endfor %}
+    <hr class="os-divider">
+    <div class="os-row"><span>Subtotal</span><span>${{ '%.2f'|format(total) }}</span></div>
+    <div class="os-row"><span>Shipping</span><span style="color:#4fffb0">FREE</span></div>
+    <div class="os-row"><span>Tax (8%)</span><span>${{ '%.2f'|format(total*0.08) }}</span></div>
+    <div class="os-total"><span>Total</span><span>${{ '%.2f'|format(total*1.08) }}</span></div>
+
+    <button class="btn-pay" id="pay-btn" onclick="processPayment()">🔒 Place Order — ${{ '%.2f'|format(total*1.08) }}</button>
+    <div class="secure-badge"><i class="fa fa-shield-halved"></i> SSL Secured · 256-bit Encrypted</div>
+
+    <div class="processing" id="processing">
+      <div class="spinner"></div>
+      <p style="color:#aaa;font-weight:700">Processing your order...</p>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  function switchTab(name, el) {
+    document.querySelectorAll('.pay-tab').forEach(t=>t.classList.remove('active'));
+    document.querySelectorAll('.pay-panel').forEach(p=>p.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('panel-'+name).classList.add('active');
+  }
+
+  function formatCard(input) {
+    let v = input.value.replace(/\D/g,'').substring(0,16);
+    input.value = v.replace(/(.{4})/g,'$1 ').trim();
+    const icon = document.getElementById('card-icon');
+    if(v.startsWith('4')) icon.textContent='💙';
+    else if(v.startsWith('5')) icon.textContent='🔴';
+    else if(v.startsWith('37')) icon.textContent='🟢';
+    else icon.textContent='💳';
+  }
+
+  function formatExpiry(input) {
+    let v = input.value.replace(/\D/g,'');
+    if(v.length >= 2) v = v.substring(0,2)+'/'+v.substring(2,4);
+    input.value = v;
+  }
+
+  function processPayment() {
+    const btn = document.getElementById('pay-btn');
+    const proc = document.getElementById('processing');
+    btn.disabled = true;
+    btn.style.display = 'none';
+    proc.style.display = 'block';
+    fetch('/api/checkout', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({})})
+      .then(r=>r.json()).then(d=>{ if(d.success) { setTimeout(()=>{ window.location.href = d.redirect; }, 1800); } });
+  }
+</script>
+{% endblock %}
